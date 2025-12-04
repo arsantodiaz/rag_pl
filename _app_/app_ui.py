@@ -44,11 +44,18 @@ class DirectOllamaEmbeddings(Embeddings):
         self.timeout = timeout
 
     def _embed(self, text: str) -> list[float]:
+        # PERBAIKAN 3: Menangani teks kosong atau hanya spasi
+        if not text or text.isspace():
+            # Mengembalikan zero vector jika teks kosong untuk menghindari error dari Ollama
+            # Dimensi 768 adalah standar untuk nomic-embed-text
+            return [0.0] * 768
+            
         try:
-            # PERBAIKAN 1: Menggunakan key "input" agar kompatibel dengan Ollama terbaru
+            # PERBAIKAN 1: Menggunakan key "prompt". Beberapa versi Ollama mungkin menggunakan "input".
+            # Jika terjadi error 500, coba ganti antara "prompt" dan "input".
             payload = {
                 "model": self.model,
-                "input": text
+                "prompt": text
             }
 
             res = requests.post(
@@ -61,7 +68,9 @@ class DirectOllamaEmbeddings(Embeddings):
 
             # PERBAIKAN 2: Cek 'embeddings' (jamak) dulu, lalu fallback ke 'embedding'
             if "embeddings" in response_json:
-                # Endpoint /api/embed mengembalikan list of lists
+                # Menangani kasus di mana 'embeddings' adalah list kosong
+                if not response_json["embeddings"]:
+                    return [0.0] * 768
                 return response_json["embeddings"][0]
             elif "embedding" in response_json:
                 return response_json["embedding"]
