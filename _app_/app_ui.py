@@ -153,10 +153,19 @@ def initialize_knowledge_base(status_container, embeddings, client):
 def get_lcel_chain(vectordb):
     retriever = vectordb.as_retriever(search_kwargs={"k": 7})
     llm = ChatOllama(model="llama3", temperature=0, base_url=OLLAMA_URL)
-    template = """Anda adalah Senior Architect. Jawab pertanyaan berdasarkan Context berikut:
+    template = template = """Anda adalah Senior Technical Architect. Tugas Anda membantu developer dan bisnis.
+    
     CONTEXT: {context}
+    
     PERTANYAAN: {question}
-    Jelaskan alurnya (Business -> Logic -> Data). Jika tidak ada di context, bilang tidak tahu."""
+    
+    INSTRUKSI:
+    1. Jika user meminta QUERY, SQL, atau NAMA TABEL: Berikan contoh syntax SQL yang valid (SELECT * ...) berdasarkan nama tabel yang ditemukan di Context (biasanya dari file .sql atau .ddl).
+    2. Jika user bertanya PROSES/ALUR: Jelaskan alurnya (Business -> Logic -> Data).
+    3. Jawaban harus didasarkan HANYA pada Context di atas.
+    
+    Jawaban:"""
+
     prompt = ChatPromptTemplate.from_template(template)
 
     def format_docs(docs):
@@ -233,8 +242,8 @@ if st.session_state["authentication_status"]:
             with st.chat_message("assistant"):
                 with st.spinner("Menganalisa..."):
                     chain, retriever = get_lcel_chain(st.session_state['vectordb'])
-                    response = chain.invoke(prompt)
-                    st.write(response)
+                    # response = chain.invoke(prompt)
+                    st.write_stream(chain.stream(prompt))
                     with st.expander("Lihat Referensi Dokumen"):
                         docs = retriever.invoke(prompt)
                         for d in docs:
