@@ -1,0 +1,6 @@
+/_ollama_/ollama_models/
+/_app_/chroma_data/
+/_app_/db_chroma_ui/
+/_app_/chroma_db_gemini/
+/.venv_new/
+/.idea/
