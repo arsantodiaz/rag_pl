@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  # 1. DATABASE VECTOR (ChromaDB)
+  # Berjalan di port 8000
+  chroma:
+    image: chromadb/chroma
+    container_name: chroma_server
+    ports:
+      - "8000:8000"
+    environment:
+      - IS_PERSISTENT=TRUE
+    volumes:
+      - chroma_data:/chroma/chroma
+    networks:
+      - rag_network
+
+  # 2. OTAK AI (Ollama)
+  # Berjalan di port 11434
+  ollama:
+    image: ollama/ollama:latest
+    container_name: rag_precentialife_brain
+    ports:
+      - "11434:11434"
+    volumes:
+      # Menyimpan model (llama3, nomic) agar tidak perlu download ulang saat restart
+      - ./ollama_models:/root/.ollama
+    networks:
+      - rag_network
+    # Uncomment di bawah ini jika PC Anda punya GPU NVIDIA & Docker NVIDIA Toolkit
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+volumes:
+  chroma_data:
+    driver: local
+
+networks:
+  rag_network:
+    driver: bridge

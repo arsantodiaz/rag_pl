@@ -1,0 +1,10 @@
+streamlit
+streamlit-authenticator
+langchain-core
+langchain-community
+langchain-text-splitters
+chromadb
+watchdog
+pypdf
+python-docx
+unstructured

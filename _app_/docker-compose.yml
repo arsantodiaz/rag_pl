@@ -1,0 +1,14 @@
+services:
+  # 1. APLIKASI WEB
+  rag-precentialife:
+    build: .
+    container_name: rag_precentialife_app
+    ports:
+      - "8501:8501"
+    volumes:
+      # Database Vector (Simpan hasil belajar AI)
+      - ./chroma_data:/app/db_chroma_ui
+
+      # === MOUNT ROOT WORKSPACE ===
+      # Host: D:\Workspace_PL  --> Container: /app/workspace
+      - D:/Workspace_PL:/app/workspace
